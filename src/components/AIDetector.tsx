@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { API_URL } from "@/lib/config";
 
 const MAX_WORDS = 500;
 
@@ -17,8 +18,7 @@ export function AIDetector() {
     setLoading(true);
     setResult(null);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-      const res = await fetch(`${apiUrl}/score`, {
+      const res = await fetch(`${API_URL}/score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),

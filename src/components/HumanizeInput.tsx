@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import type { ModeId } from "./ModeSelector";
+import { API_URL } from "@/lib/config";
 
 const MAX_WORDS_FREE = 500;
 
@@ -25,8 +26,7 @@ export function HumanizeInput({ mode }: { mode: ModeId }) {
     setError(null);
     setResult(null);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-      const res = await fetch(`${apiUrl}/humanize`, {
+      const res = await fetch(`${API_URL}/humanize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, mode }),
