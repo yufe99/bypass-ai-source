@@ -1,0 +1,9 @@
+{
+  "name": "bypass-ai-frontend",
+  "pages_build_output_dir": ".vercel/output/static",
+  "compatibility_date": "2026-07-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "NEXT_PUBLIC_API_URL": "https://bypass-ai-api.yufe99.workers.dev"
+  }
+}

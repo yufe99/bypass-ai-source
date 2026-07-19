@@ -1,0 +1,16 @@
+# dependencies
+/node_modules
+/.next/
+/.wrangler/
+*.log
+.env
+.env.local
+.dev.vars
+.DS_Store
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfonode_modules/
+.next/
