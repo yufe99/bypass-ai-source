@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { API_URL } from "@/lib/config";
 
 const PLANS = [
@@ -66,11 +67,12 @@ const PLANS = [
 ];
 
 export function PricingSection({ heading = true }: { heading?: boolean }) {
-  const handleSubscribe = async (planKey: string, provider: "paypal" | "creem" = "creem") => {
+  const [provider, setProvider] = useState<"creem" | "paypal">("creem");
+
+  const handleSubscribe = async (planKey: string) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const endpoint = provider === "paypal" ? "/subscribe" : "/subscribe/creem";
-      const res = await fetch(`${apiUrl}${endpoint}`, {
+      const res = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planKey }),
@@ -93,7 +95,7 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, plan: typeof PLANS[number]) => {
     if (!plan.planKey) return; // Free plan uses regular href
     e.preventDefault();
-    handleSubscribe(plan.planKey, "creem");
+    handleSubscribe(plan.planKey);
   };
 
   return (
@@ -155,6 +157,61 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
                   </li>
                 ))}
               </ul>
+
+              {/* Payment provider toggle — only for paid plans */}
+              {p.planKey && (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 0,
+                    marginBottom: 12,
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-sm)",
+                    overflow: "hidden",
+                    background: "var(--color-bg-alt)",
+                  }}
+                  role="radiogroup"
+                  aria-label="Payment provider"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setProvider("creem")}
+                    aria-pressed={provider === "creem"}
+                    style={{
+                      flex: 1,
+                      padding: "10px 8px",
+                      background: provider === "creem" ? "var(--color-primary)" : "transparent",
+                      color: provider === "creem" ? "#fff" : "var(--color-text-muted)",
+                      border: "none",
+                      fontSize: ".82rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "background .15s",
+                    }}
+                  >
+                    Creem
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProvider("paypal")}
+                    aria-pressed={provider === "paypal"}
+                    style={{
+                      flex: 1,
+                      padding: "10px 8px",
+                      background: provider === "paypal" ? "var(--color-primary)" : "transparent",
+                      color: provider === "paypal" ? "#fff" : "var(--color-text-muted)",
+                      border: "none",
+                      fontSize: ".82rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "background .15s",
+                    }}
+                  >
+                    PayPal
+                  </button>
+                </div>
+              )}
+
               <a
                 href={p.href}
                 className={`pricing-cta ${p.ctaClass}`}
