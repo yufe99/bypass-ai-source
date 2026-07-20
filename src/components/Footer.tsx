@@ -7,7 +7,7 @@ export function Footer() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 32, marginBottom: 32 }}>
           <div>
             <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.2rem", fontWeight: 700, marginBottom: 12 }}>
-              BypassAI.online
+              bodyscore.me
             </div>
             <p style={{ color: "#a8c4b0", fontSize: ".9rem", lineHeight: 1.6 }}>
               Professional AI text humanization. Write with confidence.
@@ -32,7 +32,7 @@ export function Footer() {
           </div>
         </div>
         <div style={{ borderTop: "1px solid #2d5a42", paddingTop: 24, color: "#a8c4b0", fontSize: ".85rem", textAlign: "center" }}>
-          © {new Date().getFullYear()} BypassAI.online · All rights reserved.
+          © {new Date().getFullYear()} bodyscore.me · All rights reserved.
         </div>
       </div>
     </footer>

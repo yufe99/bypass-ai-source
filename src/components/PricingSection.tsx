@@ -66,9 +66,11 @@ const PLANS = [
 ];
 
 export function PricingSection({ heading = true }: { heading?: boolean }) {
-  const handleSubscribe = async (planKey: string) => {
+  const handleSubscribe = async (planKey: string, provider: "paypal" | "creem" = "creem") => {
     try {
-      const res = await fetch(`${API_URL}/subscribe`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+      const endpoint = provider === "paypal" ? "/subscribe" : "/subscribe/creem";
+      const res = await fetch(`${apiUrl}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planKey }),
@@ -79,8 +81,9 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
         return;
       }
       const data = await res.json();
-      if (data.approvalUrl) {
-        window.location.href = data.approvalUrl;
+      const url = data.checkoutUrl || data.approvalUrl;
+      if (url) {
+        window.location.href = url;
       }
     } catch (e: any) {
       alert(`Could not reach billing server: ${e.message || "unknown error"}`);
@@ -90,7 +93,7 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, plan: typeof PLANS[number]) => {
     if (!plan.planKey) return; // Free plan uses regular href
     e.preventDefault();
-    handleSubscribe(plan.planKey);
+    handleSubscribe(plan.planKey, "creem");
   };
 
   return (
