@@ -69,9 +69,10 @@ const PLANS = [
 export function PricingSection({ heading = true }: { heading?: boolean }) {
   const [provider, setProvider] = useState<"creem" | "paypal">("creem");
 
-  const handleSubscribe = async (planKey: string) => {
+  const handleSubscribe = async (planKey: string, p?: "creem" | "paypal") => {
+    const useProvider = p ?? provider;
     try {
-      const endpoint = provider === "paypal" ? "/subscribe" : "/subscribe/creem";
+      const endpoint = useProvider === "paypal" ? "/subscribe" : "/subscribe/creem";
       const res = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,6 +90,17 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
       }
     } catch (e: any) {
       alert(`Could not reach billing server: ${e.message || "unknown error"}`);
+    }
+  };
+
+  // 选 toggle → 立即跳到对应支付方式（不再需要再点 Upgrade 按钮）
+  const handleProviderSelect = (
+    planKey: string | undefined,
+    newProvider: "creem" | "paypal"
+  ) => {
+    setProvider(newProvider);
+    if (planKey) {
+      handleSubscribe(planKey, newProvider);
     }
   };
 
@@ -175,7 +187,7 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
                 >
                   <button
                     type="button"
-                    onClick={() => setProvider("creem")}
+                    onClick={() => handleProviderSelect(p.planKey, "creem")}
                     aria-pressed={provider === "creem"}
                     style={{
                       flex: 1,
@@ -193,7 +205,7 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setProvider("paypal")}
+                    onClick={() => handleProviderSelect(p.planKey, "paypal")}
                     aria-pressed={provider === "paypal"}
                     style={{
                       flex: 1,
