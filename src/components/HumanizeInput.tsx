@@ -39,7 +39,7 @@ export function HumanizeInput({ mode }: { mode: ModeId }) {
     setError(null);
     setResult(null);
     try {
-      // 60s timeout — long enough for Academic mode (4 DeepSeek calls)
+      // 60s timeout per attempt — Academic mode can take ~30s
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000);
 
@@ -49,6 +49,7 @@ export function HumanizeInput({ mode }: { mode: ModeId }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, mode }),
         signal: controller.signal,
+        keepalive: true,
       });
       clearTimeout(timeoutId);
       const fetchMs = Date.now() - fetchStart;
@@ -71,12 +72,48 @@ export function HumanizeInput({ mode }: { mode: ModeId }) {
       const data = await res.json();
       setResult(data);
     } catch (e: any) {
+      // Auto-retry once on network failure (browser-specific transient)
+      if (!e?.name?.includes("Abort") && (e?.message?.includes("Failed to fetch") || e?.message?.includes("Load failed"))) {
+        console.warn(`[humanize] first attempt failed, retrying in 1s...`);
+        await new Promise((r) => setTimeout(r, 1000));
+        try {
+          const controller2 = new AbortController();
+          const timeoutId2 = setTimeout(() => controller2.abort(), 60000);
+          const res = await fetch(`${API_URL}/humanize`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, mode }),
+            signal: controller2.signal,
+            keepalive: true,
+          });
+          clearTimeout(timeoutId2);
+          console.log(`[humanize] retry fetch status=${res.status}`);
+          if (res.status === 429) {
+            const body = await res.json().catch(() => ({}));
+            setLimitInfo({
+              limit: body.limit ?? 3,
+              resetAt: body.resetAt ?? new Date(Date.now() + 86400000).toISOString(),
+            });
+            setShowUpgradeModal(true);
+            return;
+          }
+          if (res.ok) {
+            const data = await res.json();
+            setResult(data);
+            return;
+          }
+        } catch (retryErr: any) {
+          // fall through to error display
+          e = retryErr;
+        }
+      }
+
       const isTimeout = e?.name === "AbortError";
       const isNetwork = e?.message?.includes("Failed to fetch") || e?.message?.includes("Load failed");
       const detail = isTimeout
-        ? "Request timed out after 60s. The backend may be slow or unreachable."
+        ? "Request timed out after 60s. Please try again."
         : isNetwork
-        ? "Network error (Failed to fetch). Check your internet connection or try a VPN."
+        ? "Network error. Please try again — if it persists, use a VPN."
         : e?.message || "Humanization failed";
       console.error(`[humanize] ${isTimeout ? "TIMEOUT" : isNetwork ? "NETWORK" : "ERROR"}:`, e);
       setError(detail);

@@ -31,6 +31,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
+        {/* Preconnect / DNS prefetch to backend — speeds up first request */}
+        <link rel="preconnect" href="https://bypass-ai-api.yufe99.workers.dev" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://bypass-ai-api.yufe99.workers.dev" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

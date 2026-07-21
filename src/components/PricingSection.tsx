@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { API_URL } from "@/lib/config";
 
 const PLANS = [
@@ -68,48 +68,72 @@ const PLANS = [
 
 export function PricingSection({ heading = true }: { heading?: boolean }) {
   const [provider, setProvider] = useState<"creem" | "paypal">("creem");
+  const [loading, setLoading] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  // Warm up the connection on mount so the first user-initiated request is fast
+  useEffect(() => {
+    // Pre-warm with a tiny GET to /health (no auth, fast)
+    fetch(`${API_URL}/health`, { method: "GET", keepalive: true }).catch(() => {});
+  }, []);
 
   const handleSubscribe = async (planKey: string, p?: "creem" | "paypal") => {
     const useProvider = p ?? provider;
+    setLoading(true);
+    setLoadingPlan(planKey);
     let t0 = 0;
-    try {
-      const endpoint = useProvider === "paypal" ? "/subscribe" : "/subscribe/creem";
-      // 30s timeout for subscription creation
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-      t0 = performance.now();
-      const res = await fetch(`${API_URL}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planKey }),
-        signal: controller.signal,
-        keepalive: true,
-      });
-      clearTimeout(timeoutId);
-      const tElapsed = Math.round(performance.now() - t0);
-      console.log(`[subscribe/${useProvider}] took ${tElapsed}ms, status=${res.status}, url=${API_URL}${endpoint}`);
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-        alert(`Subscription failed: ${err.error || res.status}`);
+    let lastError: any = null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const endpoint = useProvider === "paypal" ? "/subscribe" : "/subscribe/creem";
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        t0 = performance.now();
+        const res = await fetch(`${API_URL}${endpoint}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: planKey }),
+          signal: controller.signal,
+          keepalive: true,
+        });
+        clearTimeout(timeoutId);
+        const tElapsed = Math.round(performance.now() - t0);
+        console.log(`[subscribe/${useProvider}] attempt ${attempt}: took ${tElapsed}ms, status=${res.status}`);
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        const url = data.checkoutUrl || data.approvalUrl;
+        if (url) {
+          window.location.href = url;
+          return;
+        }
+        return;
+      } catch (e: any) {
+        lastError = e;
+        const tElapsed = t0 ? Math.round(performance.now() - t0) : 0;
+        const isNetwork = e?.message?.includes("Failed to fetch") || e?.message?.includes("Load failed");
+        console.warn(`[subscribe/${useProvider}] attempt ${attempt} failed after ${tElapsed}ms:`, e?.message);
+        if (attempt === 1 && isNetwork) {
+          await new Promise((r) => setTimeout(r, 1000));
+          continue;
+        }
+        const isTimeout = e?.name === "AbortError";
+        const msg = isTimeout
+          ? `Request timed out after 30s. Please try again.`
+          : isNetwork
+          ? `Network error. Please try again — if it persists, use a VPN.`
+          : e?.message || "unknown error";
+        console.error(`[subscribe] final ${isTimeout ? "TIMEOUT" : isNetwork ? "NETWORK" : "ERROR"}:`, e);
+        alert(`Could not reach billing server: ${msg}`);
+        setLoading(false);
+        setLoadingPlan(null);
         return;
       }
-      const data = await res.json();
-      const url = data.checkoutUrl || data.approvalUrl;
-      if (url) {
-        window.location.href = url;
-      }
-    } catch (e: any) {
-      const tElapsed = Math.round(performance.now() - t0);
-      const isTimeout = e?.name === "AbortError";
-      const isNetwork = e?.message?.includes("Failed to fetch") || e?.message?.includes("Load failed");
-      const msg = isTimeout
-        ? `Request timed out after 30s (took ${tElapsed}ms). Backend may be slow — try again or use a VPN.`
-        : isNetwork
-        ? `Network error after ${tElapsed}ms (Failed to fetch). Check your internet connection, try a VPN, or disable browser extensions.`
-        : e?.message || "unknown error";
-      console.error(`[subscribe] ${isTimeout ? "TIMEOUT" : isNetwork ? "NETWORK" : "ERROR"} after ${tElapsed}ms:`, e);
-      alert(`Could not reach billing server: ${msg}`);
     }
+    setLoading(false);
+    setLoadingPlan(null);
   };
 
   // 选 toggle → 立即跳到对应支付方式（不再需要再点 Upgrade 按钮）
@@ -247,9 +271,18 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
                 href={p.href}
                 className={`pricing-cta ${p.ctaClass}`}
                 onClick={(e) => handleClick(e, p)}
-                style={{ display: "block", textAlign: "center", padding: "12px 20px", borderRadius: "var(--radius-sm)", fontWeight: 600, textDecoration: "none", cursor: "pointer" }}
+                style={{
+                  display: "block",
+                  textAlign: "center",
+                  padding: "12px 20px",
+                  borderRadius: "var(--radius-sm)",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  cursor: loadingPlan === p.planKey ? "wait" : "pointer",
+                  opacity: loadingPlan === p.planKey ? 0.7 : 1,
+                }}
               >
-                {p.cta}
+                {loadingPlan === p.planKey ? "Connecting..." : p.cta}
               </a>
             </div>
           ))}
