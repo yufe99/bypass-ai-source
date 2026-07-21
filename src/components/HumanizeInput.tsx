@@ -39,11 +39,21 @@ export function HumanizeInput({ mode }: { mode: ModeId }) {
     setError(null);
     setResult(null);
     try {
+      // 60s timeout — long enough for Academic mode (4 DeepSeek calls)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+      const fetchStart = Date.now();
       const res = await fetch(`${API_URL}/humanize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, mode }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
+      const fetchMs = Date.now() - fetchStart;
+      console.log(`[humanize] fetch took ${fetchMs}ms, status=${res.status}`);
+
       if (res.status === 429) {
         // Daily free limit reached — show upgrade modal
         const body = await res.json().catch(() => ({}));
@@ -61,7 +71,15 @@ export function HumanizeInput({ mode }: { mode: ModeId }) {
       const data = await res.json();
       setResult(data);
     } catch (e: any) {
-      setError(e.message?.includes("Failed to fetch") ? "Could not reach the humanization server. Please try again." : e.message || "Humanization failed");
+      const isTimeout = e?.name === "AbortError";
+      const isNetwork = e?.message?.includes("Failed to fetch") || e?.message?.includes("Load failed");
+      const detail = isTimeout
+        ? "Request timed out after 60s. The backend may be slow or unreachable."
+        : isNetwork
+        ? "Network error (Failed to fetch). Check your internet connection or try a VPN."
+        : e?.message || "Humanization failed";
+      console.error(`[humanize] ${isTimeout ? "TIMEOUT" : isNetwork ? "NETWORK" : "ERROR"}:`, e);
+      setError(detail);
     } finally {
       setLoading(false);
     }

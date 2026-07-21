@@ -71,13 +71,23 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
 
   const handleSubscribe = async (planKey: string, p?: "creem" | "paypal") => {
     const useProvider = p ?? provider;
+    let t0 = 0;
     try {
       const endpoint = useProvider === "paypal" ? "/subscribe" : "/subscribe/creem";
+      // 30s timeout for subscription creation
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      t0 = performance.now();
       const res = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planKey }),
+        signal: controller.signal,
+        keepalive: true,
       });
+      clearTimeout(timeoutId);
+      const tElapsed = Math.round(performance.now() - t0);
+      console.log(`[subscribe/${useProvider}] took ${tElapsed}ms, status=${res.status}, url=${API_URL}${endpoint}`);
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
         alert(`Subscription failed: ${err.error || res.status}`);
@@ -89,7 +99,16 @@ export function PricingSection({ heading = true }: { heading?: boolean }) {
         window.location.href = url;
       }
     } catch (e: any) {
-      alert(`Could not reach billing server: ${e.message || "unknown error"}`);
+      const tElapsed = Math.round(performance.now() - t0);
+      const isTimeout = e?.name === "AbortError";
+      const isNetwork = e?.message?.includes("Failed to fetch") || e?.message?.includes("Load failed");
+      const msg = isTimeout
+        ? `Request timed out after 30s (took ${tElapsed}ms). Backend may be slow — try again or use a VPN.`
+        : isNetwork
+        ? `Network error after ${tElapsed}ms (Failed to fetch). Check your internet connection, try a VPN, or disable browser extensions.`
+        : e?.message || "unknown error";
+      console.error(`[subscribe] ${isTimeout ? "TIMEOUT" : isNetwork ? "NETWORK" : "ERROR"} after ${tElapsed}ms:`, e);
+      alert(`Could not reach billing server: ${msg}`);
     }
   };
 
