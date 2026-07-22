@@ -1,2 +1,11 @@
 /*
   Cache-Control: public, max-age=0, must-revalidate
+  Access-Control-Allow-Origin: https://bodyscore.me
+  Access-Control-Allow-Methods: GET, OPTIONS
+  Vary: Origin
+
+/api/*
+  Access-Control-Allow-Origin: https://bypass-ai-api.yufe99.workers.dev
+  Access-Control-Allow-Methods: POST, GET, OPTIONS
+  Access-Control-Allow-Headers: Content-Type
+  Vary: Origin

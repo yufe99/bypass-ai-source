@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CookieConsent } from "@/components/CookieConsent";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bodyscore.me"),
@@ -41,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap"
         />
       </head>
-      <body>{children}</body>
+      <body>{children}<CookieConsent /></body>
     </html>
   );
 }

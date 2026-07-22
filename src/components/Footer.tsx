@@ -25,9 +25,11 @@ export function Footer() {
           <div>
             <h4 style={{ fontFamily: "var(--font-serif)", marginBottom: 12, fontSize: "1rem" }}>Legal</h4>
             <ul style={{ listStyle: "none", padding: 0 }}>
-              <li style={{ marginBottom: 8 }}><a href="#" style={{ color: "#a8c4b0", fontSize: ".9rem" }}>Privacy Policy</a></li>
-              <li style={{ marginBottom: 8 }}><a href="#" style={{ color: "#a8c4b0", fontSize: ".9rem" }}>Terms of Service</a></li>
-              <li style={{ marginBottom: 8 }}><a href="#" style={{ color: "#a8c4b0", fontSize: ".9rem" }}>Refund Policy</a></li>
+              <li style={{ marginBottom: 8 }}><Link href="/privacy/" style={{ color: "#a8c4b0", fontSize: ".9rem" }}>Privacy Policy</Link></li>
+              <li style={{ marginBottom: 8 }}><Link href="/terms/" style={{ color: "#a8c4b0", fontSize: ".9rem" }}>Terms of Service</Link></li>
+              <li style={{ marginBottom: 8 }}><Link href="/refund-policy/" style={{ color: "#a8c4b0", fontSize: ".9rem" }}>Refund Policy</Link></li>
+              <li style={{ marginBottom: 8 }}><Link href="/cookie-policy/" style={{ color: "#a8c4b0", fontSize: ".9rem" }}>Cookie Policy</Link></li>
+              <li style={{ marginBottom: 8 }}><Link href="/privacy/#ccpa" style={{ color: "#a8c4b0", fontSize: ".9rem" }}>Do Not Sell or Share My Personal Information</Link></li>
             </ul>
           </div>
         </div>

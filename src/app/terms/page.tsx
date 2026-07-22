@@ -106,6 +106,28 @@ export default function TermsPage() {
         Questions about these Terms? Email{" "}
         <a href="mailto:legal@bodyscore.me">legal@bodyscore.me</a>.
       </p>
+
+      <h2 style={{ marginTop: 32, marginBottom: 12 }}>12. DMCA Copyright Notice</h2>
+      <p>
+        If you believe content on Bodyscore infringes your copyright, send a DMCA notice to our
+        designated agent:
+      </p>
+      <p>
+        Email: <a href="mailto:dmca@bodyscore.me">dmca@bodyscore.me</a>
+        <br />
+        Subject: "DMCA Notice"
+      </p>
+      <p>
+        Your notice must include: (1) identification of the copyrighted work claimed to be infringed;
+        (2) identification of the infringing material and its location; (3) your name, address,
+        phone number, and email; (4) a statement of good faith belief that use is not authorized;
+        (5) a statement under penalty of perjury that the information is accurate; and (6) your
+        physical or electronic signature.
+      </p>
+      <p>
+        We will respond to valid DMCA notices and may remove or disable access to the allegedly
+        infringing material.
+      </p>
     </article>
   );
 }

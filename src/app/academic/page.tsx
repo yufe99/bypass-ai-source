@@ -22,6 +22,38 @@ export default function AcademicPage() {
       <main>
         <section className="section">
           <div className="container">
+            {/* 🔴 Strengthened compliance warning — P1-1 fix */}
+            <div
+              style={{
+                background: "#fff3e0",
+                border: "2px solid #e65100",
+                borderRadius: "var(--radius-md)",
+                padding: 20,
+                marginBottom: 32,
+              }}
+            >
+              <h3
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  color: "#bf360c",
+                  marginBottom: 8,
+                  fontSize: "1.1rem",
+                }}
+              >
+                ⚠ Institutional Compliance Notice
+              </h3>
+              <p style={{ color: "#3e2723", fontSize: ".92rem", lineHeight: 1.65, margin: 0 }}>
+                BypassAI is a writing assistance tool designed to help you improve your drafts. It does
+                not condone academic dishonesty, plagiarism, or any violation of your institution's
+                academic integrity policies. Many universities explicitly prohibit submitting AI-generated
+                or AI-rewritten content as your own work. <strong>Users are solely responsible</strong> for
+                ensuring their use of this tool complies with all applicable institutional policies,
+                course guidelines, and academic integrity standards. Always disclose AI assistance where
+                required by your instructor or institution. Violations may result in academic penalties
+                including course failure or expulsion.
+              </p>
+            </div>
+
             <h1 style={{ fontFamily: "var(--font-serif)", color: "var(--color-primary)", fontSize: "clamp(2rem, 4vw, 2.8rem)", marginBottom: 16 }}>
               Humanize Research Papers —<br />Without Losing Your Citations
             </h1>
