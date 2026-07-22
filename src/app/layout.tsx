@@ -2,27 +2,27 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://bypass-ai.pages.dev"),
+  metadataBase: new URL("https://bodyscore.me"),
   title: {
-    default: "Professional AI Text Humanizer — Write with Confidence | BypassAI.online",
-    template: "%s | BypassAI.online",
+    default: "Bodyscore — AI Text Humanizer for Academic & Professional Writing",
+    template: "%s | Bodyscore",
   },
   description:
-    "Instantly humanize AI text to sound naturally written. Free AI score verification. No signup required. Works for academic, professional & creative writing.",
+    "Instantly humanize AI-generated text to sound naturally written. Includes free AI score verification, citation-safe rewriting for academic papers, and multi-mode rewriting pipelines. No signup required.",
   openGraph: {
-    title: "Professional AI Text Humanizer — BypassAI.online",
+    title: "Bodyscore — AI Text Humanizer",
     description:
-      "Instantly humanize AI text to sound naturally written. Free AI score verification. No signup required.",
+      "Instantly humanize AI-generated text to sound naturally written. Free AI score verification, citation-safe rewriting for academic papers.",
     locale: "en_US",
     type: "website",
-    url: "https://bypass-ai.pages.dev",
-    siteName: "BypassAI.online",
+    url: "https://bodyscore.me",
+    siteName: "Bodyscore",
   },
   twitter: {
     card: "summary",
-    title: "Professional AI Text Humanizer — BypassAI.online",
+    title: "Bodyscore — AI Text Humanizer",
     description:
-      "Instantly humanize AI text to sound naturally written. Free AI score verification. No signup required.",
+      "Instantly humanize AI-generated text to sound naturally written. Free AI score verification, citation-safe rewriting.",
   },
   robots: { index: true, follow: true },
 };
